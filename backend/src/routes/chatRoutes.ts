@@ -4,7 +4,9 @@ import {
   createChat, 
   deleteChat, 
   getChatHistory, 
-  getAllChats 
+  getAllChats, 
+  updateChatTitle,
+  generateChatTitle
 } from '../controllers/chatController';
 import pool from '../config/database';
 
@@ -15,6 +17,8 @@ router.post('/create', createChat);
 router.delete('/:id', deleteChat);
 router.get('/history/:id', getChatHistory);
 router.get('/all', getAllChats);
+router.put('/update-title/:id', updateChatTitle);
+router.post('/generate-title/:id', generateChatTitle);
 
 router.get('/test-db', async (req, res) => {
     try {
@@ -25,5 +29,6 @@ router.get('/test-db', async (req, res) => {
       //@ts-ignore
       res.status(500).json({ error: 'Database connection failed', details: error.message });
     }
-  });
+});
+
 export default router;

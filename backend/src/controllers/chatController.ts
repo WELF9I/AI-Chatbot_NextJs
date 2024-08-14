@@ -14,32 +14,25 @@ export const sendMessage = async (req: Request, res: Response) => {
     if (role !== 'user') {
       return res.status(400).json({ error: 'Only user messages can be sent through this endpoint' });
     }
-
-    // Generate response from AI
     const response = await generateResponse(content);
-
-    // Start transaction
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
 
-      // Insert user message
       const userMessageResult = await client.query<Message>(
         'INSERT INTO messages (conversation_id, content, role) VALUES ($1, $2, $3) RETURNING *',
         [conversation_id, content, 'user']
       );
-
-      // Insert assistant message
       const assistantMessageResult = await client.query<Message>(
         'INSERT INTO messages (conversation_id, content, role) VALUES ($1, $2, $3) RETURNING *',
         [conversation_id, response, 'assistant']
       );
-
+  
       await client.query('COMMIT');
-
+  
       res.json({ 
-        userMessage: userMessageResult.rows[0],
-        assistantMessage: assistantMessageResult.rows[0]
+        userMessage: { ...userMessageResult.rows[0], isNew: true },
+        assistantMessage: { ...assistantMessageResult.rows[0], isNew: true }
       });
     } catch (transactionError) {
       await client.query('ROLLBACK');
@@ -77,8 +70,6 @@ export const deleteChat = async (req: Request, res: Response) => {
     if (!id) {
       return res.status(400).json({ error: 'Chat ID is required' });
     }
-
-    // No need to delete messages separately due to ON DELETE CASCADE
     const result = await pool.query('DELETE FROM conversations WHERE id = $1 RETURNING *', [id]);
     
     if (result.rowCount === 0) {
@@ -117,5 +108,61 @@ export const getAllChats = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error in getAllChats:', error);
     res.status(500).json({ error: 'An error occurred while fetching all chats' });
+  }
+};
+
+export const updateChatTitle = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { title } = req.body;
+
+    if (!id || !title) {
+      return res.status(400).json({ error: 'Chat ID and title are required' });
+    }
+
+    const result = await pool.query(
+      'UPDATE conversations SET title = $1 WHERE id = $2 RETURNING *',
+      [title, id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Chat not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error in updateChatTitle:', error);
+    res.status(500).json({ error: 'An error occurred while updating the chat title' });
+  }
+};
+export const generateChatTitle = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: 'Chat ID is required' });
+    }
+
+    const result = await pool.query<Message>(
+      'SELECT content FROM messages WHERE conversation_id = $1 ORDER BY created_at DESC LIMIT 1',
+      [id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'No messages found for this chat' });
+    }
+
+    const latestMessage = result.rows[0].content;
+    const generatedTitle = `${latestMessage.substring(0, 20)}...`;
+
+    await pool.query(
+      'UPDATE conversations SET title = $1 WHERE id = $2',
+      [generatedTitle, id]
+    );
+
+    res.json({ title: generatedTitle });
+  } catch (error) {
+    console.error('Error in generateChatTitle:', error);
+    res.status(500).json({ error: 'An error occurred while generating the chat title' });
   }
 };
