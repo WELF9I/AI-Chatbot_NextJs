@@ -8,7 +8,9 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3001;
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'https://ai-chatbot-seven-fawn.vercel.app'
+}));
 app.use(express.json());
 
 app.use('/api/chat', chatRoutes);
