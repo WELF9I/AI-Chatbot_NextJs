@@ -7,24 +7,33 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import NewChatButton from './NewChatButton'
 import ChatHistoryItem from './ChatHistoryItem'
-import { Chat } from '@/types'
-import { getAllChats } from '@/lib/api'
+import { Conversation } from '@/types'
+import { getAllChats, createOrGetUser } from '@/lib/api'
 import { Menu } from 'lucide-react'
 import { usePathname } from 'next/navigation'
-import { SignedIn } from '@clerk/nextjs'
+import { SignedIn, useUser } from '@clerk/nextjs'
 
 export default function Sidebar() {
   const pathname = usePathname()
-  const [chats, setChats] = useState<Chat[]>([])
+  const [chats, setChats] = useState<Conversation[]>([])
+  const { isLoaded, isSignedIn, user } = useUser()
+  const [userId, setUserId] = useState<number | null>(null)
 
   useEffect(() => {
-    const fetchChats = async () => {
-      const fetchedChats = await getAllChats()
-      setChats(fetchedChats)
+    if (isLoaded && isSignedIn && user) {
+      createOrGetUser(user.id, user.fullName || '', user.primaryEmailAddress?.emailAddress || '')
+        .then(userData => {
+          setUserId(userData.id)
+          return fetchChats(userData.id)
+        })
+        .catch(error => console.error('Error creating/getting user:', error))
     }
-    fetchChats()
-  }, [])
+  }, [isLoaded, isSignedIn, user])
 
+  const fetchChats = async (userId: number) => {
+    const fetchedChats = await getAllChats(userId)
+    setChats(fetchedChats)
+  }
   const handleDeleteChat = (chatId: number) => {
     setChats(chats.filter(chat => chat.id !== chatId))
   }

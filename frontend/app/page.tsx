@@ -1,18 +1,32 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import ChatInput from '@/components/ChatInput'
 import Sidebar from '@/components/Sidebar'
 import { useRouter } from 'next/navigation'
-import { createChat, sendMessage } from '@/lib/api'
-import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs'
+import { createChat, sendMessage, createOrGetUser } from '@/lib/api'
+import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from '@clerk/nextjs'
 
 export default function Home() {
   const router = useRouter()
+  const { isLoaded, isSignedIn, user } = useUser()
+  const [userId, setUserId] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn && user) {
+      createOrGetUser(user.id, user.fullName || '', user.primaryEmailAddress?.emailAddress || '')
+        .then(userData => setUserId(userData.id))
+        .catch(error => console.error('Error creating/getting user:', error))
+    }
+  }, [isLoaded, isSignedIn, user])
+
   const handleSendMessage = async (message: string) => {
-    const newChat = await createChat('New Chat')
-    await sendMessage(newChat.id, message)
-    router.push(`/chat/${newChat.id}`)
+    if (userId) {
+      const newChat = await createChat('New Chat', userId)
+      await sendMessage(newChat.id, message, userId)
+      router.push(`/chat/${newChat.id}`)
+    }
   }
 
   return (

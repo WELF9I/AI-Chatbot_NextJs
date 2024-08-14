@@ -5,45 +5,49 @@ import { useParams, useRouter } from 'next/navigation'
 import ChatInput from '@/components/ChatInput'
 import ChatMessage from '@/components/ChatMessage'
 import Sidebar from '@/components/Sidebar'
-import { getChatHistory, sendMessage, generateTitle } from '@/lib/api'
+import { getChatHistory, sendMessage, generateTitle, createOrGetUser } from '@/lib/api'
 import { Message } from '@/types'
 import Link from 'next/link'
-import { SignedIn, SignedOut, UserButton, useAuth } from '@clerk/nextjs'
+import { SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs'
 
 export default function ChatPage() {
   const { id } = useParams()
   const [messages, setMessages] = useState<Message[]>([])
   const [title, setTitle] = useState('')
-  const { isLoaded, userId } = useAuth()
+  const { isLoaded, isSignedIn, user } = useUser()
+  const [userId, setUserId] = useState<number | null>(null)
   const router = useRouter()
 
   useEffect(() => {
-    if (isLoaded && !userId) {
+    if (isLoaded && !isSignedIn) {
       router.push('/')
+    } else if (isLoaded && isSignedIn && user) {
+      createOrGetUser(user.id, user.fullName || '', user.primaryEmailAddress?.emailAddress || '')
+        .then(userData => {
+          setUserId(userData.id)
+          return fetchChatHistory(userData.id)
+        })
+        .catch(error => console.error('Error creating/getting user:', error))
     }
-  }, [isLoaded, userId, router])
+  }, [isLoaded, isSignedIn, user, router])
 
-  useEffect(() => {
-    const fetchChatHistory = async () => {
-      if (id) {
-        const history = await getChatHistory(Number(id))
-        setMessages(history)
-        if (history.length > 0) {
-          const generatedTitle = await generateTitle(Number(id))
-          setTitle(generatedTitle)
-        }
-      }
-    }
-    fetchChatHistory()
-  }, [id])
-
-  const handleSendMessage = async (content: string) => {
+  const fetchChatHistory = async (userId: number) => {
     if (id) {
-      const newMessage = await sendMessage(Number(id), content)
-      setMessages(prev => [...prev, newMessage.userMessage, newMessage.assistantMessage])
+      const history = await getChatHistory(Number(id), userId)
+      setMessages(history)
+      if (history.length > 0) {
+        const generatedTitle = await generateTitle(Number(id))
+        setTitle(generatedTitle)
+      }
     }
   }
 
+  const handleSendMessage = async (content: string) => {
+    if (id && userId) {
+      const newMessage = await sendMessage(Number(id), content, userId)
+      setMessages(prev => [...prev, newMessage.userMessage, newMessage.assistantMessage])
+    }
+  }
   if (!isLoaded || !userId) {
     return null
   }
