@@ -2,9 +2,11 @@ import { Request, Response } from 'express';
 import pool from '../config/database';
 
 export const createOrGetUser = async (req: Request, res: Response) => {
+  console.log('Received createOrGetUser request:', req.body);
   const { clerk_id, name, email } = req.body;
 
   if (!clerk_id || !name || !email) {
+    console.log('Missing required fields:', { clerk_id, name, email });
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
@@ -31,12 +33,14 @@ export const createOrGetUser = async (req: Request, res: Response) => {
       res.json(user.rows[0]);
     } catch (error) {
       await client.query('ROLLBACK');
+      console.error('Transaction error in createOrGetUser:', error);
       throw error;
     } finally {
       client.release();
     }
   } catch (error) {
-    console.error('Error in createOrGetUser:', error);
-    res.status(500).json({ error: 'An error occurred while processing the user' });
+    console.error('Detailed error in createOrGetUser:', error);
+    //@ts-ignore
+    res.status(500).json({ error: 'An error occurred while processing the user', details: error.message });
   }
 };
