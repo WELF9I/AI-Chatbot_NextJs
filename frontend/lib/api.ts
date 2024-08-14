@@ -13,12 +13,6 @@ export const sendMessage = async (conversationId: number, content: string, userI
   const response = await api.post('/chat/send', { conversation_id: conversationId, content, role: 'user', user_id: userId });
   return response.data;
 };
-
-export const createChat = async (title: string, userId: number) => {
-  const response = await api.post('/chat/create', { title, user_id: userId });
-  return response.data;
-};
-
 export const getChatHistory = async (chatId: number, userId: number) => {
   const response = await api.get(`/chat/history/${chatId}`, { params: { user_id: userId } });
   return response.data;
@@ -26,6 +20,11 @@ export const getChatHistory = async (chatId: number, userId: number) => {
 
 export const getAllChats = async (userId: number) => {
   const response = await api.get('/chat/all', { params: { user_id: userId } });
+  return response.data;
+};
+
+export const createChat = async (title: string, userId: number) => {
+  const response = await api.post('/chat/create', { title, user_id: userId });
   return response.data;
 };
 

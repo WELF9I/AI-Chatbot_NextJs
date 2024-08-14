@@ -5,7 +5,7 @@ import Image from 'next/image'
 import ChatInput from '@/components/ChatInput'
 import Sidebar from '@/components/Sidebar'
 import { useRouter } from 'next/navigation'
-import { createChat, sendMessage, createOrGetUser } from '@/lib/api'
+import { createChat, sendMessage, createOrGetUser,getAllChats } from '@/lib/api'
 import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from '@clerk/nextjs'
 
 export default function Home() {
@@ -16,10 +16,24 @@ export default function Home() {
   useEffect(() => {
     if (isLoaded && isSignedIn && user) {
       createOrGetUser(user.id, user.fullName || '', user.primaryEmailAddress?.emailAddress || '')
-        .then(userData => setUserId(userData.id))
-        .catch(error => console.error('Error creating/getting user:', error))
+        .then(userData => {
+          setUserId(userData.id);
+          // Fetch user's chats after setting userId
+          fetchUserChats(userData.id);
+        })
+        .catch(error => console.error('Error creating/getting user:', error));
     }
-  }, [isLoaded, isSignedIn, user])
+  }, [isLoaded, isSignedIn, user]);
+  
+  const fetchUserChats = async (userId: number) => {
+    try {
+      const chats = await getAllChats(userId);
+      // Update state or context with user's chats
+    } catch (error) {
+      console.error('Error fetching user chats:', error);
+    }
+  };
+  
 
   const handleSendMessage = async (message: string) => {
     if (userId) {
