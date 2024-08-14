@@ -3,11 +3,15 @@
 import Image from 'next/image'
 import ChatInput from '@/components/ChatInput'
 import Sidebar from '@/components/Sidebar'
+import { useRouter } from 'next/navigation'
+import { createChat, sendMessage } from '@/lib/api'
 
 export default function Home() {
-  const handleSendMessage = (message: string) => {
-    console.log(message)
-    // Implement your logic here
+  const router = useRouter()
+  const handleSendMessage = async (message: string) => {
+    const newChat = await createChat('New Chat')
+    await sendMessage(newChat.id, message)
+    router.push(`/chat/${newChat.id}`)
   }
 
   return (

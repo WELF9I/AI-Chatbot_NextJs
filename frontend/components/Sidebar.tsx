@@ -10,8 +10,10 @@ import ChatHistoryItem from './ChatHistoryItem'
 import { Chat } from '@/types'
 import { getAllChats } from '@/lib/api'
 import { Menu } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 
 export default function Sidebar() {
+  const pathname = usePathname()
   const [chats, setChats] = useState<Chat[]>([])
 
   useEffect(() => {
@@ -45,14 +47,15 @@ export default function Sidebar() {
             <NewChatButton />
           </div>
           <ScrollArea className="flex-1">
-            {chats.map((chat) => (
-              <ChatHistoryItem
-                key={chat.id}
-                chat={chat}
-                onDelete={handleDeleteChat}
-                onUpdate={handleUpdateChatTitle}
-              />
-            ))}
+          {chats.map((chat) => (
+            <ChatHistoryItem
+              key={chat.id}
+              chat={chat}
+              isActive={pathname === `/chat/${chat.id}`}
+              onDelete={handleDeleteChat}
+              onUpdate={handleUpdateChatTitle}
+            />
+          ))}
           </ScrollArea>
         </div>
       </SheetContent>

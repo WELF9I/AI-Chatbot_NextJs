@@ -11,39 +11,35 @@ import { Chat } from '@/types'
 import { updateChatTitle, deleteChat } from '@/lib/api'
 
 interface ChatHistoryItemProps {
-  chat: Chat
-  onDelete: (chatId: number) => void
-  onUpdate: (chatId: number, newTitle: string) => void
+  chat: Chat;
+  isActive: boolean;
+  onDelete: (chatId: number) => void;
+  onUpdate: (chatId: number, newTitle: string) => void;
 }
 
-export default function ChatHistoryItem({ chat, onDelete, onUpdate }: ChatHistoryItemProps) {
+export default function ChatHistoryItem({ chat, isActive, onDelete, onUpdate }: ChatHistoryItemProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [title, setTitle] = useState(chat.title)
   const [originalTitle, setOriginalTitle] = useState(chat.title)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
   const handleEdit = () => {
     setOriginalTitle(title)
     setIsEditing(true)
   }
-
   const handleSave = async () => {
     setIsLoading(true)
     setError(null)
-    
     try {
-      // Optimistically update the title
       setTitle(title)
       setOriginalTitle(title)
       setIsEditing(false)
 
       await updateChatTitle(chat.id, title)
-      // Call the parent function to update the chat title in the list
       onUpdate(chat.id, title)
     } catch (err) {
       setError('Failed to update title. Please try again.')
-      setTitle(originalTitle) // Revert title on error
+      setTitle(originalTitle)
     } finally {
       setIsLoading(false)
     }
@@ -53,9 +49,8 @@ export default function ChatHistoryItem({ chat, onDelete, onUpdate }: ChatHistor
     await deleteChat(chat.id)
     onDelete(chat.id)
   }
-
   return (
-    <div className="flex items-center justify-between p-2 hover:bg-secondary">
+    <div className={`flex items-center justify-between p-2 ${isActive ? 'bg-secondary' : 'hover:bg-secondary'}`}>
       {isEditing ? (
         <Input
           value={title}

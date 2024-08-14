@@ -4,15 +4,16 @@ import { Badge } from "@/components/ui/badge"
 import { Message } from '@/types'
 
 interface ChatMessageProps {
-  message: Message
+  message: Message;
+  isNew?: boolean;
 }
 
-export default function ChatMessage({ message }: ChatMessageProps) {
+export default function ChatMessage({ message, isNew = false }: ChatMessageProps) {
   const [displayedContent, setDisplayedContent] = useState('')
   const [isTyping, setIsTyping] = useState(false)
 
   useEffect(() => {
-    if (message.role === 'assistant') {
+    if (message.role === 'assistant' && isNew) {
       setIsTyping(true)
       let i = 0
       const typingInterval = setInterval(() => {
@@ -29,7 +30,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     } else {
       setDisplayedContent(message.content)
     }
-  }, [message])
+  }, [message, isNew])
 
   return (
     <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>

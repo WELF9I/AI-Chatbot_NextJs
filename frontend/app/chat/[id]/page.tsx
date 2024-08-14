@@ -7,6 +7,7 @@ import ChatMessage from '@/components/ChatMessage'
 import Sidebar from '@/components/Sidebar'
 import { getChatHistory, sendMessage, generateTitle } from '@/lib/api'
 import { Message } from '@/types'
+import Link from 'next/link'
 
 export default function ChatPage() {
   const { id } = useParams()
@@ -38,11 +39,11 @@ export default function ChatPage() {
     <div className="flex h-screen w-full bg-background text-foreground">
       <Sidebar />
       <main className="flex-1 flex flex-col">
-        <h1 className="text-2xl font-bold p-4 text-center">{title}</h1>
+        <Link href="/" className="text-2xl font-bold p-4 text-center">AI Chatbot</Link>
         <div className="flex-1 overflow-y-auto p-6 space-y-4 mb-[130px]">
-          {messages.map((message) => (
-            <ChatMessage key={message.id} message={message} />
-          ))}
+        {messages.map((message) => (
+          <ChatMessage key={message.id} message={message} isNew={message.isNew} />
+        ))}
         </div>
         <ChatInput onSendMessage={handleSendMessage} />
       </main>

@@ -7,4 +7,5 @@ export interface Chat {
     id: number;
     content: string;
     role: 'user' | 'assistant';
+    isNew?: boolean;
   }
