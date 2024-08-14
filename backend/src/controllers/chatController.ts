@@ -48,14 +48,19 @@ export const sendMessage = async (req: Request, res: Response) => {
 };
 export const createChat = async (req: Request, res: Response) => {
   try {
-    const { title, user_id } = req.body;
-    if (!title || !user_id) {
-      return res.status(400).json({ error: 'Title and user_id are required' });
+    const { title, clerk_id } = req.body;
+    if (!title || !clerk_id) {
+      return res.status(400).json({ error: 'Title and clerk_id are required' });
     }
+    const userResult = await pool.query('SELECT id FROM users WHERE clerk_id = $1', [clerk_id]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    const userId = userResult.rows[0].id;
 
     const result = await pool.query<Conversation>(
       'INSERT INTO conversations (title, user_id) VALUES ($1, $2) RETURNING *',
-      [title, user_id]
+      [title, userId]
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {
@@ -63,7 +68,6 @@ export const createChat = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'An error occurred while creating the chat' });
   }
 };
-
 export const deleteChat = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
