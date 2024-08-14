@@ -3,10 +3,6 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
 });
-export const getChatHistory = async (chatId: number, userId: number) => {
-  const response = await api.get(`/chat/history/${chatId}`, { params: { user_id: userId } });
-  return response.data;
-};
 export const generateTitle = async (conversationId: number) => {
     const response = await api.post(`/chat/generate-title/${conversationId}`);
     return response.data.title;
@@ -28,6 +24,11 @@ export const generateTitle = async (conversationId: number) => {
   
   export const createChat = async (title: string, clerkUserId: string) => {
     const response = await api.post('/chat/create', { title, clerk_id: clerkUserId });
+    return response.data;
+  };
+  
+  export const getChatHistory = async (chatId: number, clerkUserId: string) => {
+    const response = await api.get(`/chat/history/${chatId}`, { params: { clerk_id: clerkUserId } });
     return response.data;
   };
   
