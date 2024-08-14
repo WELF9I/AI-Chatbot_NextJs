@@ -48,14 +48,14 @@ export const sendMessage = async (req: Request, res: Response) => {
 };
 export const createChat = async (req: Request, res: Response) => {
   try {
-    const { title } = req.body;
-    if (!title) {
-      return res.status(400).json({ error: 'Title is required' });
+    const { title, user_id } = req.body;
+    if (!title || !user_id) {
+      return res.status(400).json({ error: 'Title and user_id are required' });
     }
 
     const result = await pool.query<Conversation>(
-      'INSERT INTO conversations (title) VALUES ($1) RETURNING *',
-      [title]
+      'INSERT INTO conversations (title, user_id) VALUES ($1, $2) RETURNING *',
+      [title, user_id]
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {
@@ -103,7 +103,15 @@ export const getChatHistory = async (req: Request, res: Response) => {
 
 export const getAllChats = async (req: Request, res: Response) => {
   try {
-    const result = await pool.query<Conversation>('SELECT * FROM conversations ORDER BY created_at DESC');
+    const { user_id } = req.query;
+    if (!user_id) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    const result = await pool.query<Conversation>(
+      'SELECT * FROM conversations WHERE user_id = $1 ORDER BY created_at DESC',
+      [user_id]
+    );
     res.json(result.rows);
   } catch (error) {
     console.error('Error in getAllChats:', error);

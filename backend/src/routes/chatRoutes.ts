@@ -6,12 +6,13 @@ import {
   getChatHistory, 
   getAllChats, 
   updateChatTitle,
-  generateChatTitle
+  generateChatTitle,
 } from '../controllers/chatController';
+import { createOrGetUser } from '../controllers/userController';
 import pool from '../config/database';
 
 const router = express.Router();
-
+router.post('/user', createOrGetUser);
 router.post('/send', sendMessage);
 router.post('/create', createChat);
 router.delete('/:id', deleteChat);
