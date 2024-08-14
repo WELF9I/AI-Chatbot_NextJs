@@ -2,15 +2,15 @@ import { Button } from "@/components/ui/button"
 import { Plus } from 'lucide-react'
 import { createChat } from '@/lib/api'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@clerk/nextjs'  // Import Clerk's useAuth hook
+import { useUser } from '@clerk/nextjs'  
 
 export default function NewChatButton() {
   const router = useRouter()
-  const { userId } = useAuth()  // Get the userId from Clerk's useAuth hook
+  const { user } = useUser() 
 
   const handleNewChat = async () => {
-    if (!userId) return // Ensure userId is available
-    const newChat = await createChat('New Chat', userId)
+    if (!user) return 
+    const newChat = await createChat('New Chat', user.id)
     router.push(`/chat/${newChat.id}`)
   }
 

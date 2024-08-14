@@ -23,16 +23,15 @@ export default function Sidebar() {
     if (isLoaded && isSignedIn && user) {
       createOrGetUser(user.id, user.fullName || '', user.primaryEmailAddress?.emailAddress || '')
         .then(userData => {
-          setUserId(userData.id);
-          return fetchChats(userData.id);
+          return fetchChats(user.id);
         })
         .catch(error => console.error('Error creating/getting user:', error));
     }
   }, [isLoaded, isSignedIn, user]);
   
-  const fetchChats = async (userId: number) => {
+  const fetchChats = async (clerkUserId: string) => {
     try {
-      const fetchedChats = await getAllChats(userId);
+      const fetchedChats = await getAllChats(clerkUserId);
       setChats(fetchedChats);
     } catch (error) {
       console.error('Error fetching chats:', error);

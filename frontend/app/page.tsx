@@ -17,17 +17,16 @@ export default function Home() {
     if (isLoaded && isSignedIn && user) {
       createOrGetUser(user.id, user.fullName || '', user.primaryEmailAddress?.emailAddress || '')
         .then(userData => {
-          setUserId(userData.id);
-          // Fetch user's chats after setting userId
-          fetchUserChats(userData.id);
+          // Fetch user's chats after creating/getting user
+          fetchUserChats(user.id);
         })
         .catch(error => console.error('Error creating/getting user:', error));
     }
   }, [isLoaded, isSignedIn, user]);
   
-  const fetchUserChats = async (userId: number) => {
+  const fetchUserChats = async (clerkUserId: string) => {
     try {
-      const chats = await getAllChats(userId);
+      const chats = await getAllChats(clerkUserId);
       // Update state or context with user's chats
     } catch (error) {
       console.error('Error fetching user chats:', error);
@@ -36,12 +35,13 @@ export default function Home() {
   
 
   const handleSendMessage = async (message: string) => {
-    if (userId) {
-      const newChat = await createChat('New Chat', userId)
-      await sendMessage(newChat.id, message, userId)
+    if (user) {
+      const newChat = await createChat('New Chat', user.id)
+      await sendMessage(newChat.id, message, user.id)
       router.push(`/chat/${newChat.id}`)
     }
   }
+
 
   return (
     <div className="flex h-screen bg-background">
