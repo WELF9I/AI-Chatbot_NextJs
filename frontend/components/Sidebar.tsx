@@ -11,6 +11,7 @@ import { Chat } from '@/types'
 import { getAllChats } from '@/lib/api'
 import { Menu } from 'lucide-react'
 import { usePathname } from 'next/navigation'
+import { SignedIn } from '@clerk/nextjs'
 
 export default function Sidebar() {
   const pathname = usePathname()
@@ -35,6 +36,7 @@ export default function Sidebar() {
   }
 
   return (
+    <SignedIn>
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="outline" size="icon" className="fixed top-4 left-4 z-10">
@@ -60,5 +62,6 @@ export default function Sidebar() {
         </div>
       </SheetContent>
     </Sheet>
+    </SignedIn>
   )
 }
