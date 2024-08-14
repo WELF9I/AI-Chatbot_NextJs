@@ -14,8 +14,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const chatController_1 = require("../controllers/chatController");
+const userController_1 = require("../controllers/userController");
 const database_1 = __importDefault(require("../config/database"));
 const router = express_1.default.Router();
+router.post('/user', userController_1.createOrGetUser);
 router.post('/send', chatController_1.sendMessage);
 router.post('/create', chatController_1.createChat);
 router.delete('/:id', chatController_1.deleteChat);

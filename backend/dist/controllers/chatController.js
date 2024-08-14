@@ -53,11 +53,11 @@ const sendMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 exports.sendMessage = sendMessage;
 const createChat = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { title } = req.body;
-        if (!title) {
-            return res.status(400).json({ error: 'Title is required' });
+        const { title, user_id } = req.body;
+        if (!title || !user_id) {
+            return res.status(400).json({ error: 'Title and user_id are required' });
         }
-        const result = yield database_1.default.query('INSERT INTO conversations (title) VALUES ($1) RETURNING *', [title]);
+        const result = yield database_1.default.query('INSERT INTO conversations (title, user_id) VALUES ($1, $2) RETURNING *', [title, user_id]);
         res.status(201).json(result.rows[0]);
     }
     catch (error) {
@@ -101,7 +101,11 @@ const getChatHistory = (req, res) => __awaiter(void 0, void 0, void 0, function*
 exports.getChatHistory = getChatHistory;
 const getAllChats = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield database_1.default.query('SELECT * FROM conversations ORDER BY created_at DESC');
+        const { user_id } = req.query;
+        if (!user_id) {
+            return res.status(400).json({ error: 'User ID is required' });
+        }
+        const result = yield database_1.default.query('SELECT * FROM conversations WHERE user_id = $1 ORDER BY created_at DESC', [user_id]);
         res.json(result.rows);
     }
     catch (error) {

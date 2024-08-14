@@ -13,23 +13,22 @@ export const createOrGetUser = async (req: Request, res: Response) => {
     try {
       await client.query('BEGIN');
 
-      // Check if user exists
-      const existingUser = await client.query('SELECT * FROM users WHERE clerk_id = $1', [clerk_id]);
+      let user = await client.query('SELECT * FROM users WHERE clerk_id = $1', [clerk_id]);
 
-      let user;
-      if (existingUser.rows.length === 0) {
-        // Create new user
-        const result = await client.query(
+      if (user.rows.length === 0) {
+        user = await client.query(
           'INSERT INTO users (clerk_id, name, email) VALUES ($1, $2, $3) RETURNING *',
           [clerk_id, name, email]
         );
-        user = result.rows[0];
       } else {
-        user = existingUser.rows[0];
+        user = await client.query(
+          'UPDATE users SET name = $2, email = $3 WHERE clerk_id = $1 RETURNING *',
+          [clerk_id, name, email]
+        );
       }
 
       await client.query('COMMIT');
-      res.json(user);
+      res.json(user.rows[0]);
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;
