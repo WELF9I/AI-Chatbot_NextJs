@@ -38,6 +38,7 @@ export const generateTitle = async (conversationId: number) => {
   };
   
   export const createOrGetUser = async (clerkId: string, name: string, email: string) => {
+    console.log('Sending createOrGetUser request:', { clerk_id: clerkId, name, email });
     const response = await api.post('/api/chat/user', { clerk_id: clerkId, name, email });
     return response.data;
   };
