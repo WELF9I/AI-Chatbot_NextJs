@@ -1,6 +1,6 @@
 # AI Chatbot
 
-![image](![Project8](https://github.com/user-attachments/assets/bd9c1974-1573-4299-b210-35ca864d75be)
+![image](https://github.com/user-attachments/assets/bd9c1974-1573-4299-b210-35ca864d75be)
 
 ## Overview
 
