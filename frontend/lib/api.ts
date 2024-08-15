@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://ai-chatbot-md4s.onrender.com',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://ai-chatbot-1nwo.onrender.com',
 });
 export const generateTitle = async (conversationId: number) => {
     const response = await api.post(`/api/chat/generate-title/${conversationId}`);
