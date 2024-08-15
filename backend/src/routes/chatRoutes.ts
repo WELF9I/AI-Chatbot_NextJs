@@ -36,6 +36,7 @@ router.get('/test-db', async (req, res) => {
     res.status(500).json({ error: 'Database connection failed', details: error.message });
   }
 });
+
 router.get('/check-tables', async (req, res) => {
   try {
     const client = await pool.connect();
