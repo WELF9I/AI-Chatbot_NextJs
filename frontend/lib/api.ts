@@ -22,6 +22,7 @@ export const generateTitle = async (conversationId: number) => {
     return response.data;
   };
   
+  
   export const createChat = async (title: string, clerkUserId: string) => {
     const response = await api.post('/api/chat/create', { title, clerk_id: clerkUserId });
     return response.data;

@@ -28,6 +28,7 @@ export default function Sidebar() {
         .catch(error => console.error('Error creating/getting user:', error));
     }
   }, [isLoaded, isSignedIn, user]);
+
   
   const fetchChats = async (clerkUserId: string) => {
     try {
