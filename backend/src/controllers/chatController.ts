@@ -107,14 +107,14 @@ export const getChatHistory = async (req: Request, res: Response) => {
 
 export const getAllChats = async (req: Request, res: Response) => {
   try {
-    const { user_id } = req.query;
-    if (!user_id) {
-      return res.status(400).json({ error: 'User ID is required' });
+    const { clerk_id } = req.query;  // Change user_id to clerk_id
+    if (!clerk_id) {
+      return res.status(400).json({ error: 'Clerk ID is required' });
     }
 
     const result = await pool.query<Conversation>(
-      'SELECT * FROM conversations WHERE user_id = $1 ORDER BY created_at DESC',
-      [user_id]
+      'SELECT * FROM conversations WHERE clerk_id = $1 ORDER BY created_at DESC',  // Use clerk_id in the query
+      [clerk_id]
     );
     res.json(result.rows);
   } catch (error) {
@@ -122,6 +122,7 @@ export const getAllChats = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'An error occurred while fetching all chats' });
   }
 };
+
 
 export const updateChatTitle = async (req: Request, res: Response) => {
   try {
