@@ -17,7 +17,6 @@ export default function Home() {
     if (isLoaded && isSignedIn && user) {
       createOrGetUser(user.id, user.fullName || '', user.primaryEmailAddress?.emailAddress || '')
         .then(userData => {
-          // Fetch user's chats after creating/getting user
           fetchUserChats(user.id);
         })
         .catch(error => console.error('Error creating/getting user:', error));
@@ -27,12 +26,10 @@ export default function Home() {
   const fetchUserChats = async (clerkUserId: string) => {
     try {
       const chats = await getAllChats(clerkUserId);
-      // Update state or context with user's chats
     } catch (error) {
       console.error('Error fetching user chats:', error);
     }
-  };
-  
+  }; 
 
   const handleSendMessage = async (message: string) => {
     if (user) {
@@ -41,8 +38,6 @@ export default function Home() {
       router.push(`/chat/${newChat.id}`)
     }
   }
-
-
   return (
     <div className="flex h-screen bg-background">
       <SignedIn>
